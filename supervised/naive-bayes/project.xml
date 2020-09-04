@@ -17,7 +17,10 @@
         <!-- <OutputPath>Example-Application-1</OutputPath> -->
         <!-- <AssemblyName>main</AssemblyName> -->
         <TargetName>main</TargetName>
-        <PlatformToolset>v141</PlatformToolset>
+	<!-- Build Tools 2017 -->
+        <!-- <PlatformToolset>v141</PlatformToolset> -->
+	<!-- Build Tools 2019 -->
+	<PlatformToolset>v142</PlatformToolset>
     </PropertyGroup>
     <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
     <ItemDefinitionGroup>
