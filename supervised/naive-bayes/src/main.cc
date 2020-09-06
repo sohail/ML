@@ -8,10 +8,16 @@
 
 #include "main.h"
 
+/*
+    P(C) = prior probability of "C" class or label or category
+    P(C/x) = posterior probability of "C" class or target or label or category given "x" predictor or attribute or feature
+    P(x/C) = likelihood or prior pobability of "x" predictor or attribute or feature  given that it belongs to "C" class or target or label or category
+ */
+
 int main (int argc, char* argv[])
 {
     cc_tokenizer::String<char> csvs;
-    cc_tokenizer::String<char>::pointer* statement;
+    cc_tokenizer::String<char>::pointer *statement, *prior_probability_class, *prior_probability_pridictor;
     cc_tokenizer::allocator<char> alloc_obj;
 
     int i;
@@ -23,12 +29,16 @@ int main (int argc, char* argv[])
 	}
     
     statement = (cc_tokenizer::String<char>::pointer*)alloc_obj.allocate(sizeof(cc_tokenizer::String<char>::pointer)*(argc - 1));
+    prior_probability_class = (cc_tokenizer::String<char>::pointer*)alloc_obj.allocate(sizeof(cc_tokenizer::String<char>::pointer)*(argc - 1));
+    prior_probability_pridictor = (cc_tokenizer::String<char>::pointer*)alloc_obj.allocate(sizeof(cc_tokenizer::String<char>::pointer)*(argc - 1));
 
     for (i = 1; i < argc; i++)
 	{		
 		csvs = csvs + cc_tokenizer::String<char>(argv[i]);
 
         statement[i - 1] = alloc_obj.allocate(sizeof(cc_tokenizer::String<char>));
+        prior_probability_class[i - 1] = alloc_obj.allocate(sizeof(cc_tokenizer::String<char>)); 
+        prior_probability_pridictor[i - 1] = alloc_obj.allocate(sizeof(cc_tokenizer::String<char>)); 
 	}
 
     cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> parser(csvs, cc_tokenizer::String<char>(CSV_FILE_EXTENSION));
@@ -65,10 +75,15 @@ int main (int argc, char* argv[])
         //cc_tokenizer::String<char> foo;
 
         while (parser.go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())
-		{            
+		{   
+            cc_tokenizer::String<char> bar;
+            cc_tokenizer::String<char> baz;
+
             if (parser.get_current_token().size())
 		    {
                 cc_tokenizer::String<char> foo;
+                
+                bar = ((bar + "P(") + parser.get_current_token()) + ")";
 
                 //std::cout<<"P(";            
                 //std::cout<<parser.get_current_token().c_str()<<"/";
@@ -90,11 +105,13 @@ int main (int argc, char* argv[])
                     {
                         //std::cout<<inner.get_token_by_number(j).c_str()<<",";
                         foo = (foo + inner.get_token_by_number(j).c_str()) + ",";
+                        baz = ((((baz + "P(") + inner.get_token_by_number(j).c_str()) + "/") + parser.get_current_token().c_str()) + ") x ";
                     }
                     else 
                     {
                         //std::cout<<inner.get_token_by_number(j).c_str()<<")\n";
                         foo = (foo + inner.get_token_by_number(j).c_str()) + ")";
+                        baz = ((((baz + "P(") + inner.get_token_by_number(j).c_str()) + "/") + parser.get_current_token().c_str()) + ")";
                     }
                 }
 
@@ -108,6 +125,8 @@ int main (int argc, char* argv[])
                 /*}*/
 
                 *((cc_tokenizer::String<char>*)(statement[i])) = foo;
+                *((cc_tokenizer::String<char>*)(prior_probability_class[i])) = bar;
+                *((cc_tokenizer::String<char>*)(prior_probability_pridictor[i])) = baz;
             }
 
             i++;
@@ -116,7 +135,17 @@ int main (int argc, char* argv[])
 
     for (i = 0; i < argc - 1; i ++)
     {
-        std::cout<<((cc_tokenizer::String<char>*)(statement[i]))->c_str()<<std::endl;
+        std::cout<<((cc_tokenizer::String<char>*)(statement[i]))->c_str()<<" = "<<((cc_tokenizer::String<char>*)(prior_probability_class[i]))->c_str()<<" x "<<((cc_tokenizer::String<char>*)(prior_probability_pridictor[i]))->c_str()<<" / ";
+        for (int j = 0; j < argc - 1; j++)
+        {
+            std::cout<<((cc_tokenizer::String<char>*)(prior_probability_class[j]))->c_str()<<" x "<<((cc_tokenizer::String<char>*)(prior_probability_pridictor[j]))->c_str();
+            if (j < (argc - 2))
+            {
+                std::cout<<" + ";
+            }
+        }
+
+        std::cout<<std::endl<<std::endl;
     }
 
     parser.reset(LINES);
@@ -137,6 +166,8 @@ int main (int argc, char* argv[])
     for (i = 1; i < argc; i++)
 	{				
         alloc_obj.deallocate(statement[i - 1]);
+        alloc_obj.deallocate(prior_probability_class[i - 1]);
+        alloc_obj.deallocate(prior_probability_pridictor[i - 1]);
 	}
 
     return 0;
