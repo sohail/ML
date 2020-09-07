@@ -43,6 +43,7 @@ int main (int argc, char* argv[])
 
     cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> parser(csvs, cc_tokenizer::String<char>(CSV_FILE_EXTENSION));
     
+    std::cout<<"Assigns class labels to problem instances. These problem instances are represented as vectors of feature values"<<std::endl;
     while (parser.go_to_next_line() != cc_tokenizer::string_character_traits<char>::eof())
     {
         while (parser.go_to_next_token() != cc_tokenizer::string_character_traits<char>::eof())
@@ -52,13 +53,13 @@ int main (int argc, char* argv[])
                 cc_tokenizer::String<char> csv = cooked_read<char>(argv[parser.get_current_token_number()]);
                 cc_tokenizer::csv_parser<cc_tokenizer::String<char>, char> inner(csv);
                 
-				std::cout<<parser.get_current_token_number()<<") "<<parser.get_current_token().c_str()<<std::endl;
+				std::cout<<parser.get_current_token_number()<<") "<<parser.get_current_token().c_str()<<" -> class label"<<std::endl;
 
                 inner.get_line_by_number(1);
 
                 for (cc_tokenizer::String<char>::size_type i = 0; i < inner.get_total_number_of_tokens(); i++)
                 {
-                    std::cout<<"----> "<<i+1<<") "<<inner.get_token_by_number(i+1).c_str()<<std::endl;
+                    std::cout<<"----> "<<i+1<<") "<<inner.get_token_by_number(i+1).c_str()<<" -> label of feature value"<<std::endl;
                 }
 			}
         }
@@ -105,7 +106,7 @@ int main (int argc, char* argv[])
                     {
                         //std::cout<<inner.get_token_by_number(j).c_str()<<",";
                         foo = (foo + inner.get_token_by_number(j).c_str()) + ",";
-                        baz = ((((baz + "P(") + inner.get_token_by_number(j).c_str()) + "/") + parser.get_current_token().c_str()) + ") x ";
+                        baz = ((((baz + "P(") + inner.get_token_by_number(j).c_str()) + "/") + parser.get_current_token().c_str()) + ")x";
                     }
                     else 
                     {
@@ -135,7 +136,7 @@ int main (int argc, char* argv[])
 
     for (i = 0; i < argc - 1; i ++)
     {
-        std::cout<<((cc_tokenizer::String<char>*)(statement[i]))->c_str()<<" = "<<((cc_tokenizer::String<char>*)(prior_probability_class[i]))->c_str()<<" x "<<((cc_tokenizer::String<char>*)(prior_probability_pridictor[i]))->c_str()<<" / ";
+        std::cout<<((cc_tokenizer::String<char>*)(statement[i]))->c_str()<<" = ("<<((cc_tokenizer::String<char>*)(prior_probability_class[i]))->c_str()<<" x "<<((cc_tokenizer::String<char>*)(prior_probability_pridictor[i]))->c_str()<<") / (";
         for (int j = 0; j < argc - 1; j++)
         {
             std::cout<<((cc_tokenizer::String<char>*)(prior_probability_class[j]))->c_str()<<" x "<<((cc_tokenizer::String<char>*)(prior_probability_pridictor[j]))->c_str();
@@ -145,7 +146,7 @@ int main (int argc, char* argv[])
             }
         }
 
-        std::cout<<std::endl<<std::endl;
+        std::cout<<")"<<std::endl<<std::endl;
     }
 
     parser.reset(LINES);
